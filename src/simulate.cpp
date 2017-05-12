@@ -4,6 +4,17 @@
 
 using namespace Rcpp;
 
+//' Jumps
+//' 
+//' \code{jumps_from_map} returns a numeric vector determining where jumps
+//' are located.
+//' 
+//' @param map a numeric vector.
+//' @param lambda a numerical value specifying the parameter of the exponential
+//' law.
+//' 
+//' @return The returned value is a numeric vector.
+//' 
 //' @export
 //' 
 // [[Rcpp::export]]
@@ -25,6 +36,14 @@ NumericVector jumps_from_map(const NumericVector &map, const double &lambda){
   return(jumps);
 }
 
+//' Chunks
+//' 
+//' \code{ancestry_chunks} converts jumps to chunks.
+//' 
+//' @param jumps a numeric vector obtained with \code{jumps_from_map}.
+//' 
+//' @return The returned value is a logical vector.
+//' 
 //' @export
 //' 
 // [[Rcpp::export]]
@@ -44,7 +63,10 @@ LogicalVector ancestry_chunks(const NumericVector &jumps){
 //' @export
 //' 
 // [[Rcpp::export]]
-NumericVector generate_hybrid_cpp(const NumericMatrix &H1, const NumericMatrix &H2, const double alpha, const LogicalVector chunks){
+NumericVector generate_hybrid_cpp(const NumericMatrix &H1, 
+                                  const NumericMatrix &H2, 
+                                  const double alpha, 
+                                  const LogicalVector chunks){
   int n = chunks.size();
   NumericVector haplotype_1(n);
   NumericVector haplotype_2(n);
