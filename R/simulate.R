@@ -18,6 +18,8 @@
 #' @param output.name a character string specifying the name of the output map
 #' file.
 #' 
+#' @importFrom vcfR read.vcfR
+#' 
 #' @return 
 #'
 #' @export
@@ -25,7 +27,7 @@
 simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2, 
                               recombinationRate, keep, output.name = "output"){
   
-  beagle <- read.vcfR(vcf.file)
+  beagle <- vcfR::read.vcfR(vcf.file)
   pop <- read.table(pop.file)[, 1]
   
   hap.pop <- vector(length = 2 * length(pop), mode = "numeric")
@@ -127,7 +129,7 @@ generate_hybrid = function(H1, H2, map, n.gen = 10, global.ancestry = 0.5){
   adm.mat <- array(0, dim = c(2 * n.hyb, length(jumps)))
 }
 
-gen_one_hybrid = function(H1, H2, alpha, jumps){
+generate_one_hybrid = function(H1, H2, alpha, jumps, ancstry.switch){
   nHAP <- min(ncol(H1), ncol(H2))
   if (nrow(H1) != nrow(H2)){
     stop("Ancestral populations should contain the same number of markers.")
@@ -148,6 +150,11 @@ gen_one_hybrid = function(H1, H2, alpha, jumps){
   haplotype.2 <- vector(mode = "numeric", length = nSNP)
   for (i in 1:n.chunks){
     p <- 1 - alpha
+    chunk <- beg[i]:end[i]
+    inter <- intersect(chunk, ancstry.switch)
+    if (length(inter) > 0){
+      p <- alpha
+    }
     nbino <- rbinom(1, 2, prob = p)
     if (nbino == 2){
       haplotype.1[beg[i]:end[i]] <- H1[beg[i]:end[i], idx.father[i]]
@@ -163,13 +170,23 @@ gen_one_hybrid = function(H1, H2, alpha, jumps){
   return(list(h1 = haplotype.1, h2 = haplotype.2))
 }
 
-gen_hybrid_matrix = function(H1, H2, alpha = 0.5, gen_map, n.hyb = ncol(H1) / 2, lambda = 1.0){
+generate_hybrid_matrix = function(H1, H2, alpha = 0.5, gen_map, 
+                                  n.hyb = ncol(H1) / 2, lambda = 1.0,
+                                  ancstry.switch = NULL){
   H <- matrix(0, nrow = nrow(H1), ncol = (2 * n.hyb))
   for (i in 1:n.hyb){
     jumps <- jumps_from_map(gen_map, lambda = lambda)  
-    h <- gen_one_hybrid(H1, H2, alpha, jumps)
+    h <- generate_one_hybrid(H1, H2, alpha, jumps, ancstry.switch = ancstry.switch)
     H[, (2 * i - 1)] <- h$h1
     H[, (2 * i)] <- h$h2
   }
   return(H)
+}
+
+get_dist_pop = function(H1, H2){
+  nSNP <- nrow(H1)
+  sum.1 <- apply(H1, MARGIN = 1, sum)
+  sum.2 <- apply(H2, MARGIN = 1, sum)
+  dist <- abs(sum.2 - sum.1)
+  return(dist)
 }
