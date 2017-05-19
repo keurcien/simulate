@@ -52,3 +52,25 @@ create_input_hapmix = function(H1, H2, H, gen_map, phys_map, chr,
   close(con = con)
   cat("DONE\n")
 }
+
+create_input_eila = function(H1, H2, H, position){
+  obj.eila <- NULL
+  obj.eila$anc1 <- haplo_to_geno(H1)  
+  obj.eila$anc2 <- haplo_to_geno(H2)
+  obj.eila$admixed <- haplo_to_geno(H)
+  obj.eila$position <- position
+  return(obj.eila)
+}
+
+create_input_rfmix = function(H1, H2, H3, gen_map){
+  G <- cbind(H1, H2, H3)
+  write.table(t(G), "rfmix_alleles.lfmm", col.names = FALSE, row.names = FALSE)
+  LEA::lfmm2geno("rfmix_alleles.lfmm", "rfmix_alleles.geno", force = TRUE)
+  formated.gen_map <- format(gen_map * 10000, scientific = FALSE, nsmall = 8) # in cM
+  write.table(formated.gen_map, "rfmix_markerlocation.txt", sep = "\n", col.names = FALSE, row.names = FALSE, quote = FALSE)
+  pop <- c(rep(1, ncol(H1)), rep(2, ncol(H2)), rep(0, ncol(H3)))
+  l3 <- stringr::str_c(pop, collapse = " ")
+  con <- file("rfmix_classes.txt")
+  writeLines(l3, con = con)
+  close(con = con)
+}

@@ -20,8 +20,8 @@ ancestral population.}
 \item{ancstrl.2}{a character string or an integer specifying the second 
 ancestral population.}
 
-\item{recombinationRate}{a numerical value expressed in cM, specifying the
-mean recombination rate of the species.}
+\item{recombinationRate}{a numerical value expressed in centiMorgans per 
+Megabase specifying the mean recombination rate of the species.}
 
 \item{keep}{an integer specifying the number of markers to keep. If missing,
 all markers will be kept.}
