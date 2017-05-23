@@ -62,15 +62,39 @@ create_input_eila = function(H1, H2, H, position){
   return(obj.eila)
 }
 
-create_input_rfmix = function(H1, H2, H3, gen_map){
+eila_from_pcadapt = function(geno, pop, anc1, anc2, admixed, position){
+  obj.eila <- NULL
+  obj.eila$anc1 <- geno[, pop == anc1]
+  obj.eila$anc2 <- geno[, pop == anc2]
+  obj.eila$admixed <- geno[, pop == admixed]
+  obj.eila$position <- position
+  return(obj.eila)
+}
+
+#' RFMix
+#'
+#' \code{create_input_rfmix}
+#'
+#' @param H1 a haplotype matrix. 
+#' @param H2 a haplotype matrix.
+#' 
+#' @return 
+#'
+#' @export
+#'
+create_input_rfmix = function(H1, H2, H3, gen_map, rfmix.output = "rfmix"){
   G <- cbind(H1, H2, H3)
-  write.table(t(G), "rfmix_alleles.lfmm", col.names = FALSE, row.names = FALSE)
-  LEA::lfmm2geno("rfmix_alleles.lfmm", "rfmix_alleles.geno", force = TRUE)
-  formated.gen_map <- format(gen_map * 10000, scientific = FALSE, nsmall = 8) # in cM
-  write.table(formated.gen_map, "rfmix_markerlocation.txt", sep = "\n", col.names = FALSE, row.names = FALSE, quote = FALSE)
+  write.table(t(G), paste0(rfmix.output, "_alleles.lfmm"), col.names = FALSE, row.names = FALSE)
+  LEA::lfmm2geno(paste0(rfmix.output, "_alleles.lfmm"),
+                 paste0(rfmix.output, "_alleles.geno"), force = TRUE)
+  file.remove(paste0(rfmix.output, "_alleles.lfmm"))
+  file.rename(paste0(rfmix.output, "_alleles.geno"), paste0(rfmix.output, "_alleles.txt"))
+  formatted.gen_map <- format(gen_map, scientific = FALSE, nsmall = 8) 
+  write.table(formatted.gen_map, paste0(rfmix.output, "_markerLocation.txt"), sep = "\n", 
+              col.names = FALSE, row.names = FALSE, quote = FALSE)
   pop <- c(rep(1, ncol(H1)), rep(2, ncol(H2)), rep(0, ncol(H3)))
   l3 <- stringr::str_c(pop, collapse = " ")
-  con <- file("rfmix_classes.txt")
+  con <- file(paste0(rfmix.output, "_classes.txt"))
   writeLines(l3, con = con)
   close(con = con)
 }

@@ -4,7 +4,7 @@
 \alias{generate_one_hybrid}
 \title{Simulation tools}
 \usage{
-generate_one_hybrid(H1, H2, alpha, jumps, ancestry.switch)
+generate_one_hybrid(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.switch)
 }
 \arguments{
 \item{H1}{a haplotype matrix.}
@@ -12,6 +12,8 @@ generate_one_hybrid(H1, H2, alpha, jumps, ancestry.switch)
 \item{H2}{a haplotype matrix.}
 
 \item{alpha}{a numerical value.}
+
+\item{beta}{a numerical value.}
 
 \item{jumps}{a numerical vector.}
 

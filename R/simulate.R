@@ -75,17 +75,19 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
     rates <- rates[1:keep, ]
   }
   
+  cat(paste0("Writing ", output.name, ".map..."))
   write.table(rates, paste0(output.name, ".map"), col.names = FALSE, row.names = FALSE)
-  cat(paste0("Writing", output.name, "_H1"))
+  cat("DONE\n")
+  cat(paste0("Writing ", output.name, "_H1..."))
   write.table(hap.int.1, paste0(output.name, "_H1"), col.names = FALSE, row.names = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing", output.name, "_H2"))
+  cat(paste0("Writing ", output.name, "_H2..."))
   write.table(hap.int.2, paste0(output.name, "_H2"), col.names = FALSE, row.names = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing", output.name, "_G1"))
+  cat(paste0("Writing ", output.name, "_G1..."))
   write.table(geno.int.1, paste0(output.name, "_G1"), col.names = FALSE, row.names = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing", output.name, "_G2"))
+  cat(paste0("Writing ", output.name, "_G2..."))
   write.table(geno.int.2, paste0(output.name, "_G2"), col.names = FALSE, row.names = FALSE)
   cat("DONE\n")
 }
@@ -98,6 +100,7 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
 #' @param H1 a haplotype matrix. 
 #' @param H2 a haplotype matrix.
 #' @param alpha a numerical value.
+#' @param beta a numerical value.
 #' @param jumps a numerical vector. 
 #' @param ancestry.switch a numerical vector.
 #' 
@@ -105,7 +108,7 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
 #'
 #' @export
 #'
-generate_one_hybrid = function(H1, H2, alpha, jumps, ancestry.switch){
+generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.switch){
   nHAP <- min(ncol(H1), ncol(H2))
   if (nrow(H1) != nrow(H2)){
     stop("Ancestral populations should contain the same number of markers.")
@@ -126,11 +129,11 @@ generate_one_hybrid = function(H1, H2, alpha, jumps, ancestry.switch){
   haplotype.2 <- vector(mode = "numeric", length = nSNP)
   true.ancestry <- vector(mode = "numeric", length = nSNP)
   for (i in 1:n.chunks){
-    p <- 1 - alpha
+    p <- alpha
     chunk <- beg[i]:end[i]
-    inter <- intersect(chunk, ancstry.switch)
+    inter <- intersect(chunk, ancestry.switch)
     if (length(inter) > 0){
-      p <- alpha
+      p <- beta
     }
     nbino <- rbinom(1, 2, prob = p)
     if (nbino == 2){
@@ -158,6 +161,7 @@ generate_one_hybrid = function(H1, H2, alpha, jumps, ancestry.switch){
 #' @param H1 a haplotype matrix. 
 #' @param H2 a haplotype matrix.
 #' @param alpha a numerical value.
+#' @param beta a numerical value.
 #' @param gen_map a numerical vector.
 #' @param n.hyb an integer.
 #' @param lambda a numerical value.
@@ -168,14 +172,14 @@ generate_one_hybrid = function(H1, H2, alpha, jumps, ancestry.switch){
 #'
 #' @export
 #'
-generate_hybrid_matrix = function(H1, H2, alpha = 0.5, gen_map, 
-                                  n.hyb = ncol(H1) / 2, lambda = 1.0,
+generate_hybrid_matrix = function(H1, H2, alpha = 0.5, beta = 1 - alpha, gen_map, 
+                                  n.hyb, lambda = 1.0,
                                   ancestry.switch = NULL){
   H <- matrix(0, nrow = nrow(H1), ncol = (2 * n.hyb))
   true.ancestry.matrix <- matrix(0, nrow = nrow(H1), ncol = n.hyb)
   for (i in 1:n.hyb){
     jumps <- jumps_from_map(gen_map, lambda = lambda)  
-    h <- generate_one_hybrid(H1, H2, alpha, jumps, ancestry.switch = ancestry.switch)
+    h <- generate_one_hybrid(H1, H2, alpha, beta = beta, jumps, ancestry.switch = ancestry.switch)
     H[, (2 * i - 1)] <- h$h1
     H[, (2 * i)] <- h$h2
     true.ancestry.matrix[, i] <- h$true.ancestry

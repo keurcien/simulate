@@ -28,11 +28,11 @@ haplo_to_ancestry = function(H, anc){
   mean_ancestry <- vector(mode = "numeric", length = nrow(H))
   
   if (anc == 1){
-    mean_ancestry <- mean_ancestry + apply(solution, MARGIN = 1, FUN = function(x){sum(x == "12" || x == "21")})   
-    mean_ancestry <- mean_ancestry + 2 * apply(solution, MARGIN = 1, FUN = function(x){sum(x == "11")})   
+    mean_ancestry <- mean_ancestry + apply(H, MARGIN = 1, FUN = function(x){sum(x %in% c("12", "21"))})   
+    mean_ancestry <- mean_ancestry + 2 * apply(H, MARGIN = 1, FUN = function(x){sum(x == "11")})   
   } else if (anc == 2){
-    mean_ancestry <- mean_ancestry + apply(solution, MARGIN = 1, FUN = function(x){sum(x == "12" || x == "21")})
-    mean_ancestry <- mean_ancestry + 2 * apply(solution, MARGIN = 1, FUN = function(x){sum(x == "22")})   
+    mean_ancestry <- mean_ancestry + apply(H, MARGIN = 1, FUN = function(x){sum(x %in% c("12", "21"))})
+    mean_ancestry <- mean_ancestry + 2 * apply(H, MARGIN = 1, FUN = function(x){sum(x == "22")})   
   }
   
   return(mean_ancestry / (2 * nIND))

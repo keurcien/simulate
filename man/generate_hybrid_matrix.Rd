@@ -4,8 +4,8 @@
 \alias{generate_hybrid_matrix}
 \title{Simulation tools}
 \usage{
-generate_hybrid_matrix(H1, H2, alpha = 0.5, gen_map, n.hyb = ncol(H1)/2,
-  lambda = 1, ancestry.switch = NULL)
+generate_hybrid_matrix(H1, H2, alpha = 0.5, beta = 1 - alpha, gen_map,
+  n.hyb, lambda = 1, ancestry.switch = NULL)
 }
 \arguments{
 \item{H1}{a haplotype matrix.}
@@ -13,6 +13,8 @@ generate_hybrid_matrix(H1, H2, alpha = 0.5, gen_map, n.hyb = ncol(H1)/2,
 \item{H2}{a haplotype matrix.}
 
 \item{alpha}{a numerical value.}
+
+\item{beta}{a numerical value.}
 
 \item{gen_map}{a numerical vector.}
 
