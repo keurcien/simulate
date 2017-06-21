@@ -23,7 +23,7 @@ ancestral population.}
 \item{recombinationRate}{a numerical value expressed in centiMorgans per 
 Megabase specifying the mean recombination rate of the species.}
 
-\item{keep}{an integer specifying the number of markers to keep. If missing,
+\item{keep}{a list specifying the markers to keep. If missing,
 all markers will be kept.}
 
 \item{output.name}{a character string specifying the name of the output map

@@ -22,16 +22,6 @@ rfmix.diploid.accuracy <- function(gt, rfmix.output){
   cat("Mean Accuracy", newTotal / totalLocs, "\n")
 }
 
-rfmix.local.ancestry <- function(rfmix.output){
-  output <- read.table(rfmix.output, stringsAsFactors = F)
-  numAdm <- ncol(output) / 2
-  numSnps <- nrow(output)
-  mat <- matrix(0, numSnps, numAdm)
-  for(adm in 1:numAdm){
-    mat[, adm] = paste0(output[, 2 * adm - 1], output[, 2 * adm])
-  }
-  return(mat)
-}
 
 
 

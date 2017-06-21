@@ -12,28 +12,3 @@ detect_outlier_region = function(stat, n.sd){
   list.end.reg <- c(list.end.reg, tail(idx, n = 1))
   return(list(beg = list.beg.reg, end = list.end.reg))
 }
-
-check_intersect = function(p, ground.truth){
-  for (i in length(p$beg)){
-    if (length(intersect(p$beg[i]:p$end[i], ground.truth)) > 0){
-      return(TRUE)    
-    }  
-  }
-  return(FALSE)
-}
-
-haplo_to_ancestry = function(H, anc){
-  nSNP <- nrow(H)
-  nIND <- ncol(H)
-  mean_ancestry <- vector(mode = "numeric", length = nrow(H))
-  
-  if (anc == 1){
-    mean_ancestry <- mean_ancestry + apply(H, MARGIN = 1, FUN = function(x){sum(x %in% c("12", "21"))})   
-    mean_ancestry <- mean_ancestry + 2 * apply(H, MARGIN = 1, FUN = function(x){sum(x == "11")})   
-  } else if (anc == 2){
-    mean_ancestry <- mean_ancestry + apply(H, MARGIN = 1, FUN = function(x){sum(x %in% c("12", "21"))})
-    mean_ancestry <- mean_ancestry + 2 * apply(H, MARGIN = 1, FUN = function(x){sum(x == "22")})   
-  }
-  
-  return(mean_ancestry / (2 * nIND))
-}

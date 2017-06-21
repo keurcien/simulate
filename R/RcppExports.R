@@ -32,12 +32,14 @@ ancestry_chunks <- function(jumps) {
     .Call('simulate_ancestry_chunks', PACKAGE = 'simulate', jumps)
 }
 
-#' @export
+#' Convert haplotypes to genotypes
 #' 
-generate_hybrid_cpp <- function(H1, H2, alpha, chunks) {
-    .Call('simulate_generate_hybrid_cpp', PACKAGE = 'simulate', H1, H2, alpha, chunks)
-}
-
+#' \code{haplo_to_geno} converts haplotypes to genotypes.
+#' 
+#' @param H a numerical matrix.
+#' 
+#' @return The returned value is a numerical matrix.
+#' 
 #' @export
 #' 
 haplo_to_geno <- function(H) {

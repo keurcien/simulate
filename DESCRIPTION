@@ -1,14 +1,14 @@
 Package: simulate
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
+Title: Introgression simulations
 Version: 1.0
 Date: 2017-05-12
-Author: Your Name
-Maintainer: Your Name <your@email.com>
-Description: One paragraph description of what the package does as one or more
-        full sentences.
+Author: Keurcien Luu
+Maintainer: Keurcien Luu <keurcien.luu@univ-grenoble-alpes.fr>
+Description: Generates introgression simulations.
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.10), RcppArmadillo
+Depends: vcfR
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 6.0.1
 SystemRequirements: C++11

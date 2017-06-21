@@ -10,6 +10,12 @@ create_input_rfmix(H1, H2, H3, gen_map, rfmix.output = "rfmix")
 \item{H1}{a haplotype matrix.}
 
 \item{H2}{a haplotype matrix.}
+
+\item{H3}{a haplotype matrix.}
+
+\item{gen_map}{a numerical vector.}
+
+\item{rfmix.output}{a character string.}
 }
 \value{
 

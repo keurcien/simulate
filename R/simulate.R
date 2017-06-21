@@ -13,7 +13,7 @@
 #' ancestral population.
 #' @param recombinationRate a numerical value expressed in centiMorgans per 
 #' Megabase specifying the mean recombination rate of the species.
-#' @param keep an integer specifying the number of markers to keep. If missing,
+#' @param keep a list specifying the markers to keep. If missing,
 #' all markers will be kept.
 #' @param output.name a character string specifying the name of the output map
 #' file.
@@ -68,11 +68,11 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
   }
   
   if (!missing(keep)){
-    hap.int.1 <- hap.int.1[1:keep, ]
-    hap.int.2 <- hap.int.2[1:keep, ]
-    geno.int.1 <- geno.int.1[1:keep, ]
-    geno.int.2 <- geno.int.2[1:keep, ]
-    rates <- rates[1:keep, ]
+    hap.int.1 <- hap.int.1[keep, ]
+    hap.int.2 <- hap.int.2[keep, ]
+    geno.int.1 <- geno.int.1[keep, ]
+    geno.int.2 <- geno.int.2[keep, ]
+    rates <- rates[keep, ]
   }
   
   cat(paste0("Writing ", output.name, ".map..."))
@@ -105,6 +105,8 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
 #' @param ancestry.switch a numerical vector.
 #' 
 #' @return 
+#' 
+#' @useDynLib simulate
 #'
 #' @export
 #'
@@ -137,17 +139,17 @@ generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.
     }
     nbino <- rbinom(1, 2, prob = p)
     if (nbino == 2){
-      haplotype.1[beg[i]:end[i]] <- H1[beg[i]:end[i], idx.father[i]]
-      haplotype.2[beg[i]:end[i]] <- H1[beg[i]:end[i], idx.mother[i]]
-      true.ancestry[beg[i]:end[i]] <- 11
+      haplotype.1[chunk] <- H1[chunk, idx.father[i]]
+      haplotype.2[chunk] <- H1[chunk, idx.mother[i]]
+      true.ancestry[chunk] <- 11
     } else if (nbino == 1){
-      haplotype.1[beg[i]:end[i]] <- H1[beg[i]:end[i], idx.father[i]]
-      haplotype.2[beg[i]:end[i]] <- H2[beg[i]:end[i], idx.mother[i]]
-      true.ancestry[beg[i]:end[i]] <- 12
+      haplotype.1[chunk] <- H1[chunk, idx.father[i]]
+      haplotype.2[chunk] <- H2[chunk, idx.mother[i]]
+      true.ancestry[chunk] <- 12
     } else if (nbino == 0){
-      haplotype.1[beg[i]:end[i]] <- H2[beg[i]:end[i], idx.father[i]]
-      haplotype.2[beg[i]:end[i]] <- H2[beg[i]:end[i], idx.mother[i]]
-      true.ancestry[beg[i]:end[i]] <- 22
+      haplotype.1[chunk] <- H2[chunk, idx.father[i]]
+      haplotype.2[chunk] <- H2[chunk, idx.mother[i]]
+      true.ancestry[chunk] <- 22
     }
   }
   return(list(h1 = haplotype.1, h2 = haplotype.2, true.ancestry = true.ancestry))
@@ -185,6 +187,26 @@ generate_hybrid_matrix = function(H1, H2, alpha = 0.5, beta = 1 - alpha, gen_map
     true.ancestry.matrix[, i] <- h$true.ancestry
   }
   return(list(H = H, true.ancestry.matrix = true.ancestry.matrix))
+}
+
+#' Simulation tools
+#'
+#' \code{check_intersect}
+#'
+#' @param p a list containing two integers.
+#' @param ground.truth a vector of integers.
+#' 
+#' @return 
+#'
+#' @export
+#'
+check_intersect = function(p, ground.truth){
+  for (i in length(p$beg)){
+    if (length(intersect(p$beg[i]:p$end[i], ground.truth)) > 0){
+      return(TRUE)    
+    }  
+  }
+  return(FALSE)
 }
 
 #' Simulation tools

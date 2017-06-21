@@ -29,20 +29,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// generate_hybrid_cpp
-NumericVector generate_hybrid_cpp(const NumericMatrix& H1, const NumericMatrix& H2, const double alpha, const LogicalVector chunks);
-RcppExport SEXP simulate_generate_hybrid_cpp(SEXP H1SEXP, SEXP H2SEXP, SEXP alphaSEXP, SEXP chunksSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type H1(H1SEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type H2(H2SEXP);
-    Rcpp::traits::input_parameter< const double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< const LogicalVector >::type chunks(chunksSEXP);
-    rcpp_result_gen = Rcpp::wrap(generate_hybrid_cpp(H1, H2, alpha, chunks));
-    return rcpp_result_gen;
-END_RCPP
-}
 // haplo_to_geno
 NumericMatrix haplo_to_geno(const NumericMatrix& H);
 RcppExport SEXP simulate_haplo_to_geno(SEXP HSEXP) {
@@ -53,4 +39,16 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(haplo_to_geno(H));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"simulate_jumps_from_map", (DL_FUNC) &simulate_jumps_from_map, 2},
+    {"simulate_ancestry_chunks", (DL_FUNC) &simulate_ancestry_chunks, 1},
+    {"simulate_haplo_to_geno", (DL_FUNC) &simulate_haplo_to_geno, 1},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_simulate(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }
