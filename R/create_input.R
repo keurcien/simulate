@@ -192,6 +192,24 @@ create_input_loter = function(H1, H2, H, loter.output){
   write.table(t(H), paste0(loter.output, "H_loter.txt"), col.names = FALSE, row.names = FALSE)
 }
 
+#' Input tools
+#'
+#' \code{create_all_inputs} 
+#'
+#' @param H1 a haplotype matrix. 
+#' @param H2 a haplotype matrix.
+#' @param H a haplotype matrix.
+#' @param directory a character string.
+#' @param pos_map a numeric vector.
+#' @param gen_map a numeric vector.
+#' @param pop a numeric vector.
+#' @param df a data.frame.
+#' @param gt.df a data.frame.
+#' 
+#' @return 
+#'
+#' @export
+#'
 create_all_inputs = function(H1, H2, H, directory, pos_map, gen_map, pop, df, gt.df){
   input.pcadapt <- create_input_pcadapt(H1, H2, H)
   write.table(input.pcadapt, paste0(directory, "/simu.pcadapt"), col.names = FALSE, row.names = FALSE)
@@ -200,5 +218,6 @@ create_all_inputs = function(H1, H2, H, directory, pos_map, gen_map, pop, df, gt
   #create_input_loter(H1, H2, H3, paste0(dir.name, "/"))  
   write.table(pop, paste0(directory, "/pop.txt"), col.names = FALSE, row.names = FALSE, quote = FALSE)
   write.table(df, paste0(directory, "/parameters.txt"), col.names = TRUE, quote = FALSE)
-  write.table(gt.df, paste0(directory, "/gt.txt"), col.names = TRUE, quote = FALSE)
+  write.table(gt.df$gt.df, paste0(directory, "/gt.txt"), col.names = TRUE, row.names = FALSE, quote = FALSE)
+  write(gt.df$intro.reg, paste0(directory, "/gt_all.txt"), ncolumns = 1)
 }

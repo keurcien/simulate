@@ -6,6 +6,18 @@
 
 using namespace Rcpp;
 
+// detect_cpp
+NumericVector detect_cpp(const NumericVector& stat, double threshold);
+RcppExport SEXP simulate_detect_cpp(SEXP statSEXP, SEXP thresholdSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericVector& >::type stat(statSEXP);
+    Rcpp::traits::input_parameter< double >::type threshold(thresholdSEXP);
+    rcpp_result_gen = Rcpp::wrap(detect_cpp(stat, threshold));
+    return rcpp_result_gen;
+END_RCPP
+}
 // jumps_from_map
 NumericVector jumps_from_map(const NumericVector& map, const double& lambda);
 RcppExport SEXP simulate_jumps_from_map(SEXP mapSEXP, SEXP lambdaSEXP) {
@@ -42,6 +54,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"simulate_detect_cpp", (DL_FUNC) &simulate_detect_cpp, 2},
     {"simulate_jumps_from_map", (DL_FUNC) &simulate_jumps_from_map, 2},
     {"simulate_ancestry_chunks", (DL_FUNC) &simulate_ancestry_chunks, 1},
     {"simulate_haplo_to_geno", (DL_FUNC) &simulate_haplo_to_geno, 1},
