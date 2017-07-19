@@ -4,13 +4,18 @@
 \alias{generate_hybrid_matrix}
 \title{Simulation tools}
 \usage{
-generate_hybrid_matrix(H1, H2, alpha = 0.5, beta = 1 - alpha, gen_map,
-  n.hyb, lambda = 1, ancestry.switch = NULL)
+generate_hybrid_matrix(refpop1_integer, refpop2_integer, refpop1, refpop2,
+  alpha = 0.5, beta = 1 - alpha, gen_map, n.hyb, lambda = 1,
+  ancestry.switch = NULL)
 }
 \arguments{
-\item{H1}{a haplotype matrix.}
+\item{refpop1_integer}{a haplotype matrix.}
 
-\item{H2}{a haplotype matrix.}
+\item{refpop2_integer}{a haplotype matrix.}
+
+\item{refpop1}{a haplotype matrix.}
+
+\item{refpop2}{a haplotype matrix.}
 
 \item{alpha}{a numerical value.}
 

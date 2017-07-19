@@ -4,7 +4,7 @@
 \alias{create_input_rfmix}
 \title{RFMix}
 \usage{
-create_input_rfmix(H1, H2, H3, gen_map, rfmix.output = "rfmix")
+create_input_rfmix(H1, H2, H3, gen_map, rfmix.output = "RFMix")
 }
 \arguments{
 \item{H1}{a haplotype matrix.}

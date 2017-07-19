@@ -160,7 +160,7 @@ eila_from_pcadapt = function(geno, pop, anc1, anc2, admixed, position){
 #'
 #' @export
 #'
-create_input_rfmix = function(H1, H2, H3, gen_map, rfmix.output = "rfmix"){
+create_input_rfmix = function(H1, H2, H3, gen_map, rfmix.output = "RFMix"){
   G <- cbind(H1, H2, H3)
   write.table(t(G), paste0(rfmix.output, "_alleles.lfmm"), 
               col.names = FALSE, row.names = FALSE)
@@ -225,36 +225,39 @@ create_input_raspberry = function(ancstrl.1, ancstrl.2, pos_map, chr, obj.vcf, p
   write.table(bim.table, "RASPberry.bim", col.names = FALSE, row.names = FALSE, quote = FALSE)
 }
 
-p <- scan("simus/simulation401/rfmix_alleles.txt", what = "character")
-Hadm <- matrix(0, nrow = 2 * length(p), ncol = 25)
-REF <- vcfR::getREF(obj.vcf)
-ALT <- vcfR::getALT(obj.vcf)
-for (i in 1:length(p)){
-  line <- tail(strsplit(p[i], split = "")[[1]], n = 50)
-  line_A <- line[seq(1, 50, by = 2)]
-  line_B <- line[seq(2, 50, by = 2)]
-  Hadm[2 * i - 1, ] <- line_A
-  Hadm[2 * i, ] <- line_B
-  Hadm[2 * i - 1, line_A == "0"] <- REF[i]
-  Hadm[2 * i - 1, line_A == "1"] <- strsplit(ALT[i], split = ",")[[1]][1]
-  Hadm[2 * i, line_B == "0"] <- REF[i]
-  Hadm[2 * i, line_B == "1"] <- strsplit(ALT[i], split = ",")[[1]][1]
-}
-N <- 25
-PED <- cbind(rep("FAM", N),
-             1:N,
-             rep(0, N),
-             rep(0, N),
-             rep(0, N),
-             rep(0, N),
-             t(Hadm))
-write.table(PED, "RASPberry.ped", col.names = FALSE, row.names = FALSE, quote = FALSE)
+# p <- scan("simus/simulation401/rfmix_alleles.txt", what = "character")
+# Hadm <- matrix(0, nrow = 2 * length(p), ncol = 25)
+# REF <- vcfR::getREF(obj.vcf)
+# ALT <- vcfR::getALT(obj.vcf)
+# for (i in 1:length(p)){
+#   line <- tail(strsplit(p[i], split = "")[[1]], n = 50)
+#   line_A <- line[seq(1, 50, by = 2)]
+#   line_B <- line[seq(2, 50, by = 2)]
+#   Hadm[2 * i - 1, ] <- line_A
+#   Hadm[2 * i, ] <- line_B
+#   Hadm[2 * i - 1, line_A == "0"] <- REF[i]
+#   Hadm[2 * i - 1, line_A == "1"] <- strsplit(ALT[i], split = ",")[[1]][1]
+#   Hadm[2 * i, line_B == "0"] <- REF[i]
+#   Hadm[2 * i, line_B == "1"] <- strsplit(ALT[i], split = ",")[[1]][1]
+# }
+# N <- 25
+# PED <- cbind(rep("FAM", N),
+#              1:N,
+#              rep(0, N),
+#              rep(0, N),
+#              rep(0, N),
+#              rep(0, N),
+#              t(Hadm))
+# write.table(PED, "RASPberry.ped", col.names = FALSE, row.names = FALSE, quote = FALSE)
 #' Input tools
 #'
 #' \code{create_all_inputs} 
 #'
-#' @param H1 a haplotype matrix. 
-#' @param H2 a haplotype matrix.
+#' @param refpop1_integer a haplotype matrix. 
+#' @param refpop2_integer a haplotype matrix.
+#' @param refpop1 a haplotype matrix. 
+#' @param refpop2 a haplotype matrix. 
+#' @param H.integer a haplotype matrix.
 #' @param H a haplotype matrix.
 #' @param directory a character string.
 #' @param pos_map a numeric vector.
@@ -267,14 +270,47 @@ write.table(PED, "RASPberry.ped", col.names = FALSE, row.names = FALSE, quote = 
 #'
 #' @export
 #'
-create_all_inputs = function(H1, H2, H, directory, pos_map, gen_map, pop, df, gt.df){
-  input.pcadapt <- create_input_pcadapt(H1, H2, H)
-  write.table(input.pcadapt, paste0(directory, "/simu.pcadapt"), col.names = FALSE, row.names = FALSE)
-  input.eila <- create_input_eila(H1, H2, H, position = pos_map)
-  create_input_rfmix(H1, H2, H, gen_map = gen_map, rfmix.output = paste0(directory, "/rfmix"))
+create_all_inputs = function(refpop1_integer, 
+                             refpop2_integer,
+                             refpop1,
+                             refpop2,
+                             H.integer,
+                             H,
+                             directory, 
+                             pos_map, 
+                             gen_map, 
+                             pop, 
+                             df, 
+                             gt.df){
+  input.pcadapt <- create_input_pcadapt(refpop1_integer, refpop2_integer, H.integer)
+  write.table(input.pcadapt, 
+              paste0(directory, "/simu.pcadapt"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
+  #input.eila <- create_input_eila(H1, H2, H, position = pos_map)
+  create_input_rfmix(refpop1_integer, 
+                     refpop2_integer,
+                     H.integer, 
+                     gen_map = gen_map, 
+                     rfmix.output = paste0(directory, "/RFMix"))
   #create_input_loter(H1, H2, H3, paste0(dir.name, "/"))  
-  write.table(pop, paste0(directory, "/pop.txt"), col.names = FALSE, row.names = FALSE, quote = FALSE)
-  write.table(df, paste0(directory, "/parameters.txt"), col.names = TRUE, quote = FALSE)
-  write.table(gt.df$gt.df, paste0(directory, "/gt.txt"), col.names = TRUE, row.names = FALSE, quote = FALSE)
-  write(gt.df$intro.reg, paste0(directory, "/gt_all.txt"), ncolumns = 1)
+  write.table(pop, 
+              paste0(directory, "/pop.txt"), 
+              col.names = FALSE, 
+              row.names = FALSE, 
+              quote = FALSE)
+  write.table(df, 
+              paste0(directory, "/parameters.txt"), 
+              col.names = TRUE, 
+              row.names = FALSE,
+              quote = FALSE)
+  write.table(gt.df$gt.df, 
+              paste0(directory, "/gt.txt"), 
+              col.names = TRUE, 
+              row.names = FALSE, 
+              quote = FALSE)
+  write(gt.df$intro.reg, 
+        paste0(directory, "/gt_all.txt"), 
+        ncolumns = 1)
 }

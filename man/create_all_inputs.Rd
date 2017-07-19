@@ -4,12 +4,19 @@
 \alias{create_all_inputs}
 \title{Input tools}
 \usage{
-create_all_inputs(H1, H2, H, directory, pos_map, gen_map, pop, df, gt.df)
+create_all_inputs(refpop1_integer, refpop2_integer, refpop1, refpop2, H.integer,
+  H, directory, pos_map, gen_map, pop, df, gt.df)
 }
 \arguments{
-\item{H1}{a haplotype matrix.}
+\item{refpop1_integer}{a haplotype matrix.}
 
-\item{H2}{a haplotype matrix.}
+\item{refpop2_integer}{a haplotype matrix.}
+
+\item{refpop1}{a haplotype matrix.}
+
+\item{refpop2}{a haplotype matrix.}
+
+\item{H.integer}{a haplotype matrix.}
 
 \item{H}{a haplotype matrix.}
 

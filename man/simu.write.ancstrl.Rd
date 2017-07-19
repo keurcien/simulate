@@ -4,20 +4,19 @@
 \alias{simu.write.ancstrl}
 \title{Simulation tools}
 \usage{
-simu.write.ancstrl(vcf.file, pop.file, ancstrl.1, ancstrl.2, recombinationRate,
+simu.write.ancstrl(obj.vcfR, pop, ancestral.1, ancestral.2, recombinationRate,
   keep, output.name = "output")
 }
 \arguments{
-\item{vcf.file}{a character string specifying the name of a VCF file 
-generated with Beagle containing phased haplotypes.}
+\item{obj.vcfR}{an object of class vcfR obtained with a Beagle output.}
 
-\item{pop.file}{a character string specifying the name of a text file 
-containing the population labels for each individual present in the VCF file.}
+\item{pop}{a string vector specifying the population labels for 
+each individual present in the VCF file.}
 
-\item{ancstrl.1}{a character string or an integer specifying the first 
+\item{ancestral.1}{a character string or an integer specifying the first 
 ancestral population.}
 
-\item{ancstrl.2}{a character string or an integer specifying the second 
+\item{ancestral.2}{a character string or an integer specifying the second 
 ancestral population.}
 
 \item{recombinationRate}{a numerical value expressed in centiMorgans per 

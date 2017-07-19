@@ -4,12 +4,17 @@
 \alias{generate_one_hybrid}
 \title{Simulation tools}
 \usage{
-generate_one_hybrid(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.switch)
+generate_one_hybrid(refpop1_integer, refpop2_integer, refpop1, refpop2, alpha,
+  beta = 1 - alpha, jumps, ancestry.switch)
 }
 \arguments{
-\item{H1}{a haplotype matrix.}
+\item{refpop1_integer}{a haplotype matrix.}
 
-\item{H2}{a haplotype matrix.}
+\item{refpop2_integer}{a haplotype matrix.}
+
+\item{refpop1}{a haplotype matrix.}
+
+\item{refpop2}{a haplotype matrix.}
 
 \item{alpha}{a numerical value.}
 

@@ -3,13 +3,12 @@
 #' \code{simu.write.ancstrl} creates haplotype matrices and genotype matrices 
 #' from Beagle outputs. 
 #'
-#' @param vcf.file a character string specifying the name of a VCF file 
-#' generated with Beagle containing phased haplotypes.
-#' @param pop.file a character string specifying the name of a text file 
-#' containing the population labels for each individual present in the VCF file.
-#' @param ancstrl.1 a character string or an integer specifying the first 
+#' @param obj.vcfR an object of class vcfR obtained with a Beagle output.
+#' @param pop a string vector specifying the population labels for 
+#' each individual present in the VCF file.
+#' @param ancestral.1 a character string or an integer specifying the first 
 #' ancestral population.
-#' @param ancstrl.2 a character string or an integer specifying the second 
+#' @param ancestral.2 a character string or an integer specifying the second 
 #' ancestral population.
 #' @param recombinationRate a numerical value expressed in centiMorgans per 
 #' Megabase specifying the mean recombination rate of the species.
@@ -24,28 +23,44 @@
 #'
 #' @export
 #'
-simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2, 
-                              recombinationRate, keep, output.name = "output"){
+simu.write.ancstrl = function(obj.vcfR, 
+                              pop, 
+                              ancestral.1, 
+                              ancestral.2, 
+                              recombinationRate, 
+                              keep, 
+                              output.name = "output"){
   
-  beagle <- vcfR::read.vcfR(vcf.file)
-  pop <- read.table(pop.file)[, 1]
+  hap <- extract.haps(obj.vcfR)
   
   hap.pop <- vector(length = 2 * length(pop), mode = "numeric")
   hap.pop[seq(1, length(hap.pop), by = 2)] <- pop
   hap.pop[seq(2, length(hap.pop), by = 2)] <- pop
+  pos <- getPOS(obj.vcfR)
+  gen <- recombinationRate * pos * 1e-6 # centiMorgans per Megabase
   
-  pos <- getPOS(beagle)
-  gen <- recombinationRate * pos / 1000000 # per Megabase
-  rates <- cbind(pos, gen)
+  ref <- getREF(obj.vcfR)
+  alt <- getALT(obj.vcfR)
+  single.alt <- which(alt %in% unique(ref))
   
-  hap <- extract.haps(beagle)
-  ref <- getREF(beagle)
-  alt <- getALT(beagle)
+  hap <- hap[single.alt, ]
+  ref <- ref[single.alt]
+  alt <- alt[single.alt]
+  pos <- pos[single.alt]
+  gen <- gen[single.alt]
+  
+  if (!missing(keep)){
+    hap <- hap[keep, ]
+    ref <- ref[keep]
+    alt <- alt[keep]
+    pos <- pos[keep]
+    gen <- gen[keep]
+  }
   
   nSNP <- nrow(hap)
   nIND <- ncol(hap) / 2
-  hap.1 <- hap[, (hap.pop == ancstrl.1)]
-  hap.2 <- hap[, (hap.pop == ancstrl.2)]
+  hap.1 <- hap[, (hap.pop == ancestral.1)]
+  hap.2 <- hap[, (hap.pop == ancestral.2)]
   hap.int.1 <- array(0, dim = dim(hap.1))
   hap.int.2 <- array(0, dim = dim(hap.2))
   geno.int.1 <- array(0, dim = c(nrow(hap.int.1), ncol(hap.int.1) / 2))
@@ -67,28 +82,56 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
     geno.int.2[, j] <- hap.int.2[, (2 * j - 1)] + hap.int.2[, (2 * j)]
   }
   
-  if (!missing(keep)){
-    hap.int.1 <- hap.int.1[keep, ]
-    hap.int.2 <- hap.int.2[keep, ]
-    geno.int.1 <- geno.int.1[keep, ]
-    geno.int.2 <- geno.int.2[keep, ]
-    rates <- rates[keep, ]
-  }
+  rates <- cbind(pos, gen)
   
   cat(paste0("Writing ", output.name, ".map..."))
-  write.table(rates, paste0(output.name, ".map"), col.names = FALSE, row.names = FALSE)
+  write.table(rates, 
+              paste0(output.name, ".map"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing ", output.name, "_H1..."))
-  write.table(hap.int.1, paste0(output.name, "_H1"), col.names = FALSE, row.names = FALSE)
+  cat(paste0("Writing ", output.name, "_refpop1.phased..."))
+  write.table(hap.1, 
+              paste0(output.name, "_refpop1.phased"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing ", output.name, "_H2..."))
-  write.table(hap.int.2, paste0(output.name, "_H2"), col.names = FALSE, row.names = FALSE)
+  cat(paste0("Writing ", output.name, "_refpop2.phased..."))
+  write.table(hap.2, 
+              paste0(output.name, "_refpop2.phased"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing ", output.name, "_G1..."))
-  write.table(geno.int.1, paste0(output.name, "_G1"), col.names = FALSE, row.names = FALSE)
+  cat(paste0("Writing ", output.name, "_refpop1_integer.phased..."))
+  write.table(hap.int.1, 
+              paste0(output.name, "_refpop1_integer.phased"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
   cat("DONE\n")
-  cat(paste0("Writing ", output.name, "_G2..."))
-  write.table(geno.int.2, paste0(output.name, "_G2"), col.names = FALSE, row.names = FALSE)
+  cat(paste0("Writing ", output.name, "_refpop2_integer.phased..."))
+  write.table(hap.int.2, 
+              paste0(output.name, "_refpop2_integer.phased"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
+  cat("DONE\n")
+  cat(paste0("Writing ", output.name, "_refpop1.pcadapt..."))
+  write.table(geno.int.1, 
+              paste0(output.name, "_refpop1.pcadapt"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
+  cat("DONE\n")
+  cat(paste0("Writing ", output.name, "_refpop2.pcadapt..."))
+  write.table(geno.int.2, 
+              paste0(output.name, "_refpop2.pcadapt"), 
+              col.names = FALSE, 
+              row.names = FALSE,
+              quote = FALSE)
   cat("DONE\n")
 }
 
@@ -97,8 +140,10 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
 #' \code{generate_hybrid} generates one hybrid individual using the 
 #' recombination map and ancestral haplotypes.
 #'
-#' @param H1 a haplotype matrix. 
-#' @param H2 a haplotype matrix.
+#' @param refpop1_integer a haplotype matrix. 
+#' @param refpop2_integer a haplotype matrix.
+#' @param refpop1 a haplotype matrix.
+#' @param refpop2 a haplotype matrix.
 #' @param alpha a numerical value.
 #' @param beta a numerical value.
 #' @param jumps a numerical vector. 
@@ -110,12 +155,23 @@ simu.write.ancstrl = function(vcf.file, pop.file, ancstrl.1, ancstrl.2,
 #'
 #' @export
 #'
-generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.switch){
-  nHAP <- min(ncol(H1), ncol(H2))
-  if (nrow(H1) != nrow(H2)){
+generate_one_hybrid = function(refpop1_integer, 
+                               refpop2_integer,
+                               refpop1,
+                               refpop2,
+                               alpha, 
+                               beta = 1 - alpha,
+                               jumps, 
+                               ancestry.switch){
+  mu <- alpha
+  sig <- 0.1
+  b_alpha <- mu * mu * ((1 - mu) / (sig * sig) - 1 / mu)
+  b_beta <- b_alpha * (1 / mu - 1)
+  nHAP <- min(ncol(refpop1_integer), ncol(refpop2_integer))
+  if (nrow(refpop1_integer) != nrow(refpop2_integer)){
     stop("Ancestral populations should contain the same number of markers.")
   }
-  nSNP <- nrow(H1)
+  nSNP <- nrow(refpop1_integer)
   n.jumps <- sum(jumps)
   n.chunks <- n.jumps + 1 
   beg <- vector(mode = "numeric", length = n.chunks)
@@ -127,11 +183,14 @@ generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.
   end[1:n.jumps] <- pmax(jumps.loc - 1, 1)
   idx.father <- sample(1:nHAP, size = n.chunks, replace = TRUE)
   idx.mother <- sample(1:nHAP, size = n.chunks, replace = TRUE)
-  haplotype.1 <- vector(mode = "numeric", length = nSNP)
-  haplotype.2 <- vector(mode = "numeric", length = nSNP)
+  haplotype.1.integer <- vector(mode = "numeric", length = nSNP)
+  haplotype.2.integer <- vector(mode = "numeric", length = nSNP)
+  haplotype.1 <- vector(mode = "character", length = nSNP)
+  haplotype.2 <- vector(mode = "character", length = nSNP)
   true.ancestry <- vector(mode = "numeric", length = nSNP)
   for (i in 1:n.chunks){
-    p <- alpha
+    #p <- alpha
+    p <- rbeta(n = 1, shape1 = b_alpha, shape2 = b_beta)
     chunk <- beg[i]:end[i]
     inter <- intersect(chunk, ancestry.switch)
     if (length(inter) > 0){
@@ -139,20 +198,30 @@ generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.
     }
     nbino <- rbinom(1, 2, prob = p)
     if (nbino == 2){
-      haplotype.1[chunk] <- H1[chunk, idx.father[i]]
-      haplotype.2[chunk] <- H1[chunk, idx.mother[i]]
+      haplotype.1.integer[chunk] <- refpop1_integer[chunk, idx.father[i]]
+      haplotype.2.integer[chunk] <- refpop1_integer[chunk, idx.mother[i]]
+      haplotype.1[chunk] <- refpop1[chunk, idx.father[i]]
+      haplotype.2[chunk] <- refpop1[chunk, idx.mother[i]]
       true.ancestry[chunk] <- 11
     } else if (nbino == 1){
-      haplotype.1[chunk] <- H1[chunk, idx.father[i]]
-      haplotype.2[chunk] <- H2[chunk, idx.mother[i]]
+      haplotype.1.integer[chunk] <- refpop1_integer[chunk, idx.father[i]]
+      haplotype.2.integer[chunk] <- refpop2_integer[chunk, idx.mother[i]]
+      haplotype.1[chunk] <- refpop1[chunk, idx.father[i]]
+      haplotype.2[chunk] <- refpop2[chunk, idx.mother[i]]
       true.ancestry[chunk] <- 12
     } else if (nbino == 0){
-      haplotype.1[chunk] <- H2[chunk, idx.father[i]]
-      haplotype.2[chunk] <- H2[chunk, idx.mother[i]]
+      haplotype.1.integer[chunk] <- refpop2_integer[chunk, idx.father[i]]
+      haplotype.2.integer[chunk] <- refpop2_integer[chunk, idx.mother[i]]
+      haplotype.1[chunk] <- refpop2[chunk, idx.father[i]]
+      haplotype.2[chunk] <- refpop2[chunk, idx.mother[i]]
       true.ancestry[chunk] <- 22
     }
   }
-  return(list(h1 = haplotype.1, h2 = haplotype.2, true.ancestry = true.ancestry))
+  return(list(h1.int = haplotype.1.integer, 
+              h2.int = haplotype.2.integer,
+              h1 = haplotype.1,
+              h2 = haplotype.2,
+              true.ancestry = true.ancestry))
 }
 
 #' Simulation tools
@@ -160,8 +229,10 @@ generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.
 #' \code{generate_hybrid_matrix} generates hybrid individuals using the 
 #' recombination map and ancestral haplotypes.
 #'
-#' @param H1 a haplotype matrix. 
-#' @param H2 a haplotype matrix.
+#' @param refpop1_integer a haplotype matrix. 
+#' @param refpop2_integer a haplotype matrix.
+#' @param refpop1 a haplotype matrix.
+#' @param refpop2 a haplotype matrix.
 #' @param alpha a numerical value.
 #' @param beta a numerical value.
 #' @param gen_map a numerical vector.
@@ -174,19 +245,38 @@ generate_one_hybrid = function(H1, H2, alpha, beta = 1 - alpha, jumps, ancestry.
 #'
 #' @export
 #'
-generate_hybrid_matrix = function(H1, H2, alpha = 0.5, beta = 1 - alpha, gen_map, 
-                                  n.hyb, lambda = 1.0,
+generate_hybrid_matrix = function(refpop1_integer,
+                                  refpop2_integer,
+                                  refpop1,
+                                  refpop2,
+                                  alpha = 0.5, 
+                                  beta = 1 - alpha, 
+                                  gen_map, 
+                                  n.hyb, 
+                                  lambda = 1.0,
                                   ancestry.switch = NULL){
-  H <- matrix(0, nrow = nrow(H1), ncol = (2 * n.hyb))
-  true.ancestry.matrix <- matrix(0, nrow = nrow(H1), ncol = n.hyb)
+  H.integer <- matrix(0, nrow = nrow(refpop1_integer), ncol = (2 * n.hyb))
+  H <- matrix(0, nrow = nrow(refpop1), ncol = (2 * n.hyb))
+  true.ancestry.matrix <- matrix(0, nrow = nrow(refpop1_integer), ncol = n.hyb)
   for (i in 1:n.hyb){
-    jumps <- jumps_from_map(gen_map, lambda = lambda)  
-    h <- generate_one_hybrid(H1, H2, alpha, beta = beta, jumps, ancestry.switch = ancestry.switch)
+    jumps <- jumps_from_map(gen_map * 1e-2, lambda = lambda) # g in Morgans
+    h <- generate_one_hybrid(refpop1_integer, 
+                             refpop2_integer, 
+                             refpop1,
+                             refpop2,
+                             alpha, 
+                             beta, 
+                             jumps, 
+                             ancestry.switch = ancestry.switch)
+    H.integer[, (2 * i - 1)] <- h$h1.int
+    H.integer[, (2 * i)] <- h$h2.int
     H[, (2 * i - 1)] <- h$h1
     H[, (2 * i)] <- h$h2
     true.ancestry.matrix[, i] <- h$true.ancestry
   }
-  return(list(H = H, true.ancestry.matrix = true.ancestry.matrix))
+  return(list(H.integer = H.integer, 
+              H = H, 
+              true.ancestry.matrix = true.ancestry.matrix))
 }
 
 #' Simulation tools
