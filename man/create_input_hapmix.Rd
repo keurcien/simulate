@@ -4,15 +4,13 @@
 \alias{create_input_hapmix}
 \title{Input tools}
 \usage{
-create_input_hapmix(H1, H2, H, gen_map, phys_map, chr, ancstrl.1 = "ANC1",
+create_input_hapmix(H1, H2, G, gen_map, phys_map, chr, ancstrl.1 = "ANC1",
   ancstrl.2 = "ANC2", admxd = "AA", rates.digits = 8)
 }
 \arguments{
 \item{H1}{a haplotype matrix.}
 
 \item{H2}{a haplotype matrix.}
-
-\item{H}{a haplotype matrix.}
 
 \item{gen_map}{a numerical vector.}
 
@@ -27,6 +25,8 @@ create_input_hapmix(H1, H2, H, gen_map, phys_map, chr, ancstrl.1 = "ANC1",
 \item{admxd}{a character string.}
 
 \item{rates.digits}{an integer.}
+
+\item{H}{a haplotype matrix.}
 }
 \value{
 

@@ -45,7 +45,7 @@ create_input_pcadapt = function(H1, H2, H){
 #'
 #' @export
 #'
-create_input_hapmix = function(H1, H2, H, gen_map, phys_map, chr, 
+create_input_hapmix = function(H1, H2, G, gen_map, phys_map, chr, 
                                ancstrl.1 = "ANC1", ancstrl.2 = "ANC2", 
                                admxd = "AA", rates.digits = 8){
   cat("Creating the genotype file for ancestral population 1...")
@@ -61,7 +61,6 @@ create_input_hapmix = function(H1, H2, H, gen_map, phys_map, chr,
   LEA::lfmm2geno(paste0(ancstrl.2, ".lfmm"), paste0(ancstrl.2, ".geno"), 
                  force = TRUE)
   cat("Creating the genotype file for the admixed population...")
-  G <- haplo_to_geno(H)
   write.table(t(G), paste0(admxd, ".lfmm"), 
               col.names = FALSE, row.names = FALSE)
   cat("DONE\n")
@@ -192,6 +191,64 @@ create_input_loter = function(H1, H2, H, loter.output){
   write.table(t(H), paste0(loter.output, "H_loter.txt"), col.names = FALSE, row.names = FALSE)
 }
 
+create_input_raspberry = function(ancstrl.1, ancstrl.2, pos_map, chr, obj.vcf, pop){
+  
+  hap.pop <- vector(length = 2 * length(pop), mode = "numeric")
+  hap.pop[seq(1, length(hap.pop), by = 2)] <- pop
+  hap.pop[seq(2, length(hap.pop), by = 2)] <- pop
+  hap.1 <- hap[, (hap.pop == ancstrl.1)]
+  hap.2 <- hap[, (hap.pop == ancstrl.2)]
+  nHAP <- ncol(hap.1)
+  nSNP <- nrow(hap.1)
+  subseq_A <- paste0("IND", 1:(nHAP / 2), "_A")
+  subseq_B <- paste0("IND", 1:(nHAP / 2), "_B")
+  subseq <- vector(mode = "character", length = nHAP)
+  REF <- vcfR::getREF(obj.vcf)
+  ALT <- vcfR::getALT(obj.vcf)
+  for (i in 1:length(ALT)){
+    ALT[i] <- strsplit(ALT[i], split = ",")[[1]][1]
+  }
+  subseq[seq(1, nHAP, by = 2)] <- subseq_A
+  subseq[seq(2, nHAP, by = 2)] <- subseq_B
+  H1.table <- cbind(data.frame(rsID = paste0("rs", 1:nSNP), position = pos_map), hap.1)
+  H2.table <- cbind(data.frame(rsID = paste0("rs", 1:nSNP), position = pos_map), hap.2)
+  colnames(H1.table) <- c("rsID", "position", subseq)
+  colnames(H2.table) <- c("rsID", "position", subseq)
+  write.table(H1.table, "refpop1.phased", row.names = FALSE, quote = FALSE)
+  write.table(H2.table, "refpop2.phased", row.names = FALSE, quote = FALSE)
+  bim.table <- data.frame(Chr = rep(chr, nSNP), 
+                          rsID = H1.table$rsID,
+                          unknown = rep(0, nSNP),
+                          position = H1.table$position,
+                          REF = REF,
+                          ALT = ALT)
+  write.table(bim.table, "RASPberry.bim", col.names = FALSE, row.names = FALSE, quote = FALSE)
+}
+
+p <- scan("simus/simulation401/rfmix_alleles.txt", what = "character")
+Hadm <- matrix(0, nrow = 2 * length(p), ncol = 25)
+REF <- vcfR::getREF(obj.vcf)
+ALT <- vcfR::getALT(obj.vcf)
+for (i in 1:length(p)){
+  line <- tail(strsplit(p[i], split = "")[[1]], n = 50)
+  line_A <- line[seq(1, 50, by = 2)]
+  line_B <- line[seq(2, 50, by = 2)]
+  Hadm[2 * i - 1, ] <- line_A
+  Hadm[2 * i, ] <- line_B
+  Hadm[2 * i - 1, line_A == "0"] <- REF[i]
+  Hadm[2 * i - 1, line_A == "1"] <- strsplit(ALT[i], split = ",")[[1]][1]
+  Hadm[2 * i, line_B == "0"] <- REF[i]
+  Hadm[2 * i, line_B == "1"] <- strsplit(ALT[i], split = ",")[[1]][1]
+}
+N <- 25
+PED <- cbind(rep("FAM", N),
+             1:N,
+             rep(0, N),
+             rep(0, N),
+             rep(0, N),
+             rep(0, N),
+             t(Hadm))
+write.table(PED, "RASPberry.ped", col.names = FALSE, row.names = FALSE, quote = FALSE)
 #' Input tools
 #'
 #' \code{create_all_inputs} 
