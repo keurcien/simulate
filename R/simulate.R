@@ -82,10 +82,11 @@ simu.write.ancstrl = function(obj.vcfR,
     geno.int.2[, j] <- hap.int.2[, (2 * j - 1)] + hap.int.2[, (2 * j)]
   }
   
-  rates <- cbind(pos, gen)
+  map.bim <- cbind(pos, gen, ref, alt)
+  cat(paste0("Writing ", output.name, ".bim..."))
   
   cat(paste0("Writing ", output.name, ".map..."))
-  write.table(rates, 
+  write.table(map.bim, 
               paste0(output.name, ".map"), 
               col.names = FALSE, 
               row.names = FALSE,
@@ -190,7 +191,7 @@ generate_one_hybrid = function(refpop1_integer,
   true.ancestry <- vector(mode = "numeric", length = nSNP)
   for (i in 1:n.chunks){
     #p <- alpha
-    p <- rbeta(n = 1, shape1 = b_alpha, shape2 = b_beta)
+    p <- rbeta(n = 1, shape1 = b_alpha, shape2 = b_beta) # Add variance
     chunk <- beg[i]:end[i]
     inter <- intersect(chunk, ancestry.switch)
     if (length(inter) > 0){

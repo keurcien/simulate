@@ -5,7 +5,8 @@
 \title{Input tools}
 \usage{
 create_all_inputs(refpop1_integer, refpop2_integer, refpop1, refpop2, H.integer,
-  H, directory, pos_map, gen_map, pop, df, gt.df)
+  H, true.ancestry.matrix, directory, pos_map, gen_map, chr, ref, alt, pop,
+  parameters, gt.df)
 }
 \arguments{
 \item{refpop1_integer}{a haplotype matrix.}
@@ -20,15 +21,23 @@ create_all_inputs(refpop1_integer, refpop2_integer, refpop1, refpop2, H.integer,
 
 \item{H}{a haplotype matrix.}
 
+\item{true.ancestry.matrix}{a matrix.}
+
 \item{directory}{a character string.}
 
 \item{pos_map}{a numeric vector.}
 
 \item{gen_map}{a numeric vector.}
 
+\item{chr}{an integer.}
+
+\item{ref}{a numeric vector.}
+
+\item{alt}{a numeric vector.}
+
 \item{pop}{a numeric vector.}
 
-\item{df}{a data.frame.}
+\item{parameters}{a data.frame.}
 
 \item{gt.df}{a data.frame.}
 }
